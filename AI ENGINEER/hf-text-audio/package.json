@@ -1,0 +1,15 @@
+{
+  "name": "Scrim-s0par5m3lu",
+  "description": "https://v2.scrimba.com/the-ai-engineer-path-c02v/~01c",
+  "scripts": {
+    "start": "vite",
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@huggingface/inference": "2.6.4",
+    "vite": "latest"
+  },
+  "devDependencies": {}
+}
