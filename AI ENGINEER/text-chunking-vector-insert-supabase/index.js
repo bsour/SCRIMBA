@@ -35,20 +35,25 @@ async function splitDocument(document) {
 /* Create an embedding from each text chunk.
 Store all embeddings and corresponding text in Supabase. */
 async function createAndStoreEmbeddings() {
-  const chunkData = await splitDocument("movies.txt");
-  const data = await Promise.all(
-    chunkData.map(async (chunk) => {
-      const embeddingResponse = await openai.embeddings.create({
-        model: "text-embedding-ada-002",
-        input: chunk.pageContent,
-      });
-      return {
-        content: chunk.pageContent,
-        embedding: embeddingResponse.data[0].embedding,
-      };
-    })
-  );
-  await supabase.from("movies").insert(data);
-  console.log("SUCCESS!");
+  try {
+    const chunkData = await splitDocument("movies.txt");
+    const data = await Promise.all(
+      chunkData.map(async (chunk) => {
+        const embeddingResponse = await openai.embeddings.create({
+          model: "text-embedding-ada-002",
+          input: chunk.pageContent,
+        });
+        return {
+          content: chunk.pageContent,
+          embedding: embeddingResponse.data[0].embedding,
+        };
+      })
+    );
+    await supabase.from("movies").insert(data);
+    console.log("SUCCESS!");
+  } catch (e) {
+    console.error('There was an issue with creating and storing embeddings');
+    throw e;
+  }
 }
 createAndStoreEmbeddings();
