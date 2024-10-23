@@ -1,4 +1,4 @@
-import { openai, supabase } from './config.js';
+import { openai, supabase } from "./config.js";
 import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
 
 /*
@@ -12,14 +12,24 @@ import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
 /* Split movies.txt into text chunks.
 Return LangChain's "output" – the array of Document objects. */
 async function splitDocument(document) {
-  const response = await fetch(document);
-  const text = await response.text();
-  const splitter = new RecursiveCharacterTextSplitter({
-    chunkSize: 250,
-    chunkOverlap: 35,
-  });
-  const output = await splitter.createDocuments([text]);
-  return output;
+  try {
+    const response = await fetch(document);
+
+    // check if fetch request was successful
+    if (!response.ok) {
+      throw new Error("Network response was not ok.");
+    }
+    const text = await response.text();
+    const splitter = new RecursiveCharacterTextSplitter({
+      chunkSize: 250,
+      chunkOverlap: 35,
+    });
+    const output = await splitter.createDocuments([text]);
+    return output;
+  } catch (e) {
+    console.error('There was an issue with splitting text');
+    throw e;
+  }
 }
 
 /* Create an embedding from each text chunk.
@@ -30,15 +40,15 @@ async function createAndStoreEmbeddings() {
     chunkData.map(async (chunk) => {
       const embeddingResponse = await openai.embeddings.create({
         model: "text-embedding-ada-002",
-        input: chunk.pageContent
+        input: chunk.pageContent,
       });
-      return { 
-        content: chunk.pageContent, 
-        embedding: embeddingResponse.data[0].embedding 
-      }
+      return {
+        content: chunk.pageContent,
+        embedding: embeddingResponse.data[0].embedding,
+      };
     })
   );
-  await supabase.from('movies').insert(data);
-  console.log('SUCCESS!');
+  await supabase.from("movies").insert(data);
+  console.log("SUCCESS!");
 }
 createAndStoreEmbeddings();
